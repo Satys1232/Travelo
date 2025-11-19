@@ -1,15 +1,15 @@
 import { useRoute } from "wouter";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/footer";
 import { TourCard } from "@/components/TourCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import type { Destination, Tour } from "@shared/schema";
-import australiaImage from "@assets/generated_images/Australia_Sydney_Opera_House_22227abe.png";
-import newZealandImage from "@assets/generated_images/New_Zealand_mountain_fjord_b8ed5ed8.png";
-import fijiImage from "@assets/generated_images/Fiji_tropical_paradise_beach_ca08e39d.png";
-import seAsiaImage from "@assets/generated_images/Southeast_Asia_temple_landmark_afb74b2d.png";
-import usaImage from "@assets/generated_images/USA_Grand_Canyon_vista_dad411ac.png";
+import australiaImage from "@assets/Australia_Sydney_Opera_House_22227abe.png";
+import newZealandImage from "@assets/New_Zealand_mountain_fjord_b8ed5ed8.png";
+import fijiImage from "@assets/Fiji_tropical_paradise_beach_ca08e39d.png";
+import seAsiaImage from "@assets/Southeast_Asia_temple_landmark_afb74b2d.png";
+import usaImage from "@assets/USA_Grand_Canyon_vista_dad411ac.png";
 
 export default function DestinationPage() {
   const [, params] = useRoute("/destinations/:slug");

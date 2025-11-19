@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/footer";
 import { TourCard } from "@/components/TourCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -11,16 +11,16 @@ import {
 } from "@shared/schema";
 
 // Image paths as strings
-const sailingImage = "/attached_assets/generated_images/Hero_beach_sailing_adventure_93433351.png";
-const coastalRoadImage = "/attached_assets/generated_images/Coastal_road_trip_tour_9ad154de.png";
-const vanImage = "/attached_assets/generated_images/Van_adventure_coastal_sunset_cee52344.png";
-const australiaImage = "/attached_assets/generated_images/Australia_Sydney_Opera_House_22227abe.png";
-const newZealandImage = "/attached_assets/generated_images/New_Zealand_mountain_fjord_b8ed5ed8.png";
-const fijiImage = "/attached_assets/generated_images/Fiji_tropical_paradise_beach_ca08e39d.png";
-const seAsiaImage = "/attached_assets/generated_images/Southeast_Asia_temple_landmark_afb74b2d.png";
-const usaImage = "/attached_assets/generated_images/USA_Grand_Canyon_vista_dad411ac.png";
-const koalaImage = "/attached_assets/generated_images/Instagram_koala_wildlife_photo_427260fd.png";
-const dogImage = "/attached_assets/generated_images/Instagram_beach_dog_photo_14c6438c.png";
+const sailingImage = "/attached_assets/Van_adventure_coastal_sunset_cee52344.png";
+const coastalRoadImage = "/attached_assets/Van_adventure_coastal_sunset_cee52344.png";
+const vanImage = "/attached_assets/Van_adventure_coastal_sunset_cee52344.png";
+const australiaImage = "/attached_assets/Australia_Sydney_Opera_House_22227abe.png";
+const newZealandImage = "/attached_assets/New_Zealand_mountain_fjord_b8ed5ed8.png";
+const fijiImage = "/attached_assets/Fiji_tropical_paradise_beach_ca08e39d.png";
+const seAsiaImage = "/attached_assets/Southeast_Asia_temple_landmark_afb74b2d.png";
+const usaImage = "/attached_assets/USA_Grand_Canyon_vista_dad411ac.png";
+const koalaImage = "/attached_assets/Instagram_koala_wildlife_photo_427260fd.png";
+const dogImage = "/attached_assets/Instagram_beach_dog_photo_14c6438c.png";
 
 async function seed() {
   console.log("🌱 Starting database seed...");

@@ -6,8 +6,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import koalaImage from "@assets/generated_images/Instagram_koala_wildlife_photo_427260fd.png";
-import dogImage from "@assets/generated_images/Instagram_beach_dog_photo_14c6438c.png";
+import koalaImage from "@assets/Instagram_koala_wildlife_photo_427260fd.png";
+import dogImage from "@assets/Instagram_beach_dog_photo_14c6438c.png";
 
 export function Footer() {
   const [email, setEmail] = useState("");
