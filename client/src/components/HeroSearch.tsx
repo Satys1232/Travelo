@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Anchor, Car, Ship, Hotel, MapPin, Search, Calendar } from "lucide-react";
-import heroImage from "@assets/generated_images/Hero_beach_sailing_adventure_93433351.png";
+import heroImage from "@assets/Van_adventure_coastal_sunset_cee52344.png";
 
 export function HeroSearch() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("tours");
   const [searchParams, setSearchParams] = useState({
     startLocation: "",
@@ -23,8 +25,16 @@ export function HeroSearch() {
   ];
 
   const handleSearch = () => {
-    // Will be connected to backend in integration phase
-    console.log("Search params:", { ...searchParams, activityType: activeTab });
+    const params = new URLSearchParams();
+    if (activeTab && activeTab !== "all") {
+      params.set("activityType", activeTab);
+    }
+    if (searchParams.startLocation || searchParams.endLocation) {
+      const searchTerm = searchParams.endLocation || searchParams.startLocation;
+      params.set("search", searchTerm);
+    }
+    
+    setLocation(`/tours${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   return (

@@ -58,12 +58,10 @@ export function TourCard({ tour }: TourCardProps) {
       {/* Content Section */}
       <CardContent className="p-4 space-y-3">
         {/* Title */}
-        <Link href={`/tours/${tour.slug}`}>
-          <a data-testid="link-tour-detail">
-            <h3 className="font-semibold text-lg leading-tight hover:text-primary transition-colors line-clamp-2">
-              {tour.title}
-            </h3>
-          </a>
+        <Link href={`/tours/${tour.slug}`} data-testid="link-tour-detail">
+          <h3 className="font-semibold text-lg leading-tight hover:text-primary transition-colors line-clamp-2 cursor-pointer">
+            {tour.title}
+          </h3>
         </Link>
 
         {/* Location */}
@@ -117,7 +115,7 @@ export function TourCard({ tour }: TourCardProps) {
           </div>
           <div className="text-xs text-muted-foreground">per person</div>
         </div>
-        <Link href={`/tours/${tour.slug}`}>
+        <Link href={`/tours/${tour.slug}`} asChild>
           <Button data-testid="button-view-details">READ MORE</Button>
         </Link>
       </CardFooter>

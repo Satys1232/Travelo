@@ -1,6 +1,8 @@
 import { useRoute } from "wouter";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/footer";
+import { BookingModal } from "@/components/BookingModal";
+import { ReviewForm } from "@/components/ReviewForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,7 @@ export default function TourDetail() {
   const [, params] = useRoute("/tours/:slug");
   const slug = params?.slug;
   const [isFavorite, setIsFavorite] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   const { data: tour, isLoading } = useQuery<Tour>({
     queryKey: [`/api/tours/${slug}`],
@@ -173,7 +176,7 @@ export default function TourDetail() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Customer Reviews</h2>
                 {reviews && reviews.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4 mb-8">
                     {reviews.slice(0, 3).map((review) => (
                       <Card key={review.id}>
                         <CardContent className="p-4">
@@ -205,8 +208,10 @@ export default function TourDetail() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No reviews yet. Be the first to review this tour!</p>
+                  <p className="text-muted-foreground mb-8">No reviews yet. Be the first to review this tour!</p>
                 )}
+                
+                <ReviewForm tourId={tour.id} tourSlug={slug!} />
               </section>
             </div>
 
@@ -241,7 +246,12 @@ export default function TourDetail() {
                   )}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button className="w-full gap-2" size="lg" data-testid="button-book-now">
+                  <Button 
+                    className="w-full gap-2" 
+                    size="lg" 
+                    data-testid="button-book-now"
+                    onClick={() => setBookingModalOpen(true)}
+                  >
                     <Calendar className="h-4 w-4" />
                     Book Now
                   </Button>
@@ -281,6 +291,14 @@ export default function TourDetail() {
       </main>
 
       <Footer />
+      
+      {tour && (
+        <BookingModal 
+          tour={tour} 
+          open={bookingModalOpen} 
+          onOpenChange={setBookingModalOpen} 
+        />
+      )}
     </div>
   );
 }
