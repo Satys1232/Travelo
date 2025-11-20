@@ -4,14 +4,17 @@ import { Instagram, Twitter, Facebook, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import koalaImage from "@assets/Instagram_koala_wildlife_photo_427260fd.png";
-import dogImage from "@assets/Instagram_beach_dog_photo_14c6438c.png";
+import type { InstagramPost } from "@shared/schema";
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const { toast } = useToast();
+
+  const { data: instagramPosts } = useQuery<InstagramPost[]>({
+    queryKey: ["/api/instagram"],
+  });
 
   const subscribeMutation = useMutation({
     mutationFn: async (email: string) => {
@@ -40,14 +43,7 @@ export function Footer() {
     }
   };
 
-  const instagramPhotos = [
-    koalaImage,
-    dogImage,
-    koalaImage,
-    dogImage,
-    koalaImage,
-    dogImage,
-  ];
+  const displayPosts = instagramPosts || [];
 
   return (
     <footer className="bg-background border-t">
@@ -75,18 +71,18 @@ export function Footer() {
 
           {/* Instagram Grid */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {instagramPhotos.map((photo, index) => (
+            {displayPosts.map((post, index) => (
               <a
-                key={index}
-                href="https://instagram.com/tramondoo"
+                key={post.id}
+                href={post.postUrl || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="aspect-square overflow-hidden rounded hover-elevate transition-all"
                 data-testid={`link-instagram-photo-${index}`}
               >
                 <img
-                  src={photo}
-                  alt={`Instagram post ${index + 1}`}
+                  src={post.imageUrl || ""}
+                  alt={post.caption || `Instagram post ${index + 1}`}
                   className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                 />
               </a>

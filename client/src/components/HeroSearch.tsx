@@ -26,15 +26,15 @@ export function HeroSearch() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (activeTab && activeTab !== "all") {
-      params.set("activityType", activeTab);
-    }
-    if (searchParams.startLocation || searchParams.endLocation) {
-      const searchTerm = searchParams.endLocation || searchParams.startLocation;
-      params.set("search", searchTerm);
-    }
+    // Always include activityType in URL parameters
+    params.set("activityType", activeTab);
+    if (searchParams.endLocation) params.set("search", searchParams.endLocation);
+    if (searchParams.startLocation) params.set("startLocation", searchParams.startLocation);
+    if (searchParams.startDate) params.set("startDate", searchParams.startDate);
+    if (searchParams.endDate) params.set("endDate", searchParams.endDate);
     
-    setLocation(`/tours${params.toString() ? `?${params.toString()}` : ""}`);
+    const queryString = params.toString();
+    setLocation(`/tours${queryString ? `?${queryString}` : ""}`);
   };
 
   return (

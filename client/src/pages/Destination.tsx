@@ -1,7 +1,8 @@
 import { useRoute } from "wouter";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/Footer";
 import { TourCard } from "@/components/TourCard";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import type { Destination, Tour } from "@shared/schema";

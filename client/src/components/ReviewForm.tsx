@@ -4,65 +4,65 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Star, User, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { Tour } from "@shared/schema";
 
 interface ReviewFormProps {
-  tourId: number;
-  tourSlug: string;
+  tour: Tour;
 }
 
-export function ReviewForm({ tourId, tourSlug }: ReviewFormProps) {
+export function ReviewForm({ tour }: ReviewFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [formData, setFormData] = useState({
-    userName: "",
-    userEmail: "",
+    customerName: "",
+    customerLocation: "",
     comment: "",
   });
 
   const reviewMutation = useMutation({
     mutationFn: async (data: typeof formData & { rating: number }) => {
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tourId,
-          userName: data.userName,
-          userEmail: data.userEmail,
-          rating: data.rating,
-          comment: data.comment,
-        }),
-      });
+      const initials = data.customerName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to submit review");
-      }
+      const reviewData = {
+        tourId: tour.id,
+        customerName: data.customerName,
+        customerInitials: initials,
+        customerLocation: data.customerLocation,
+        rating: data.rating,
+        comment: data.comment,
+      };
 
-      return response.json();
+      return await apiRequest("POST", "/api/reviews", reviewData);
     },
     onSuccess: () => {
       toast({
         title: "Review Submitted!",
-        description: "Thank you for your feedback.",
+        description: "Thank you for your feedback!",
       });
-      
-      queryClient.invalidateQueries({ queryKey: [`/api/tours/${tourSlug}/reviews`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/tours/${tourSlug}`] });
-      
-      setFormData({ userName: "", userEmail: "", comment: "" });
-      setRating(0);
-      setShowForm(false);
+      queryClient.invalidateQueries({ queryKey: [`/api/tours/${tour.slug}/reviews`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/tours/${tour.slug}`] });
+      setFormData({
+        customerName: "",
+        customerLocation: "",
+        comment: "",
+      });
+      setRating(5);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit review. Please try again.",
+        description: error.message || "There was an error submitting your review. Please try again.",
         variant: "destructive",
       });
     },
@@ -70,26 +70,27 @@ export function ReviewForm({ tourId, tourSlug }: ReviewFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0) {
+
+    if (!formData.customerName || !formData.customerLocation || !formData.comment) {
       toast({
-        title: "Rating Required",
-        description: "Please select a star rating.",
+        title: "Missing Information",
+        description: "Please fill in all fields.",
         variant: "destructive",
       });
       return;
     }
+
+    if (formData.comment.length < 20) {
+      toast({
+        title: "Comment Too Short",
+        description: "Please write at least 20 characters for your review.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     reviewMutation.mutate({ ...formData, rating });
   };
-
-  if (!showForm) {
-    return (
-      <div className="text-center py-8">
-        <Button onClick={() => setShowForm(true)} size="lg">
-          Write a Review
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <Card>
@@ -98,9 +99,10 @@ export function ReviewForm({ tourId, tourSlug }: ReviewFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Rating *</Label>
-            <div className="flex gap-1">
+          {/* Rating */}
+          <div>
+            <Label>Rating</Label>
+            <div className="flex gap-1 mt-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -108,7 +110,7 @@ export function ReviewForm({ tourId, tourSlug }: ReviewFormProps) {
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
-                  className="transition-transform hover:scale-110"
+                  className="focus:outline-none transition-transform hover:scale-110"
                 >
                   <Star
                     className={`h-8 w-8 ${
@@ -119,66 +121,75 @@ export function ReviewForm({ tourId, tourSlug }: ReviewFormProps) {
                   />
                 </button>
               ))}
+              <span className="ml-2 text-sm text-muted-foreground self-center">
+                {rating} {rating === 1 ? "star" : "stars"}
+              </span>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="userName">Name *</Label>
-            <Input
-              id="userName"
-              value={formData.userName}
-              onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-              required
-              placeholder="Your name"
-            />
+          {/* Name */}
+          <div>
+            <Label htmlFor="review-name">
+              Your Name <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="review-name"
+                placeholder="John Doe"
+                className="pl-10"
+                value={formData.customerName}
+                onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="userEmail">Email *</Label>
-            <Input
-              id="userEmail"
-              type="email"
-              value={formData.userEmail}
-              onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
-              required
-              placeholder="your.email@example.com"
-            />
+          {/* Location */}
+          <div>
+            <Label htmlFor="review-location">
+              Location <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="review-location"
+                placeholder="New York, USA"
+                className="pl-10"
+                value={formData.customerLocation}
+                onChange={(e) => setFormData({ ...formData, customerLocation: e.target.value })}
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="comment">Your Review *</Label>
+          {/* Comment */}
+          <div>
+            <Label htmlFor="review-comment">
+              Your Review <span className="text-destructive">*</span>
+            </Label>
             <Textarea
-              id="comment"
+              id="review-comment"
+              placeholder="Share your experience with this tour..."
+              rows={5}
               value={formData.comment}
               onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
               required
-              placeholder="Share your experience..."
-              rows={5}
+              minLength={20}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Minimum 20 characters ({formData.comment.length}/20)
+            </p>
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setShowForm(false);
-                setRating(0);
-                setFormData({ userName: "", userEmail: "", comment: "" });
-              }}
-              className="flex-1"
-              disabled={reviewMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={reviewMutation.isPending}
-            >
-              {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
-            </Button>
-          </div>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={reviewMutation.isPending}
+          >
+            {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
+          </Button>
         </form>
       </CardContent>
     </Card>

@@ -3,7 +3,7 @@ import { HeroSearch } from "@/components/HeroSearch";
 import { TourCard } from "@/components/TourCard";
 import { DestinationCard } from "@/components/DestinationCard";
 import { ReviewCarousel } from "@/components/ReviewCarousel";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -112,7 +112,7 @@ export default function Home() {
                     key={destination.slug}
                     name={destination.name}
                     slug={destination.slug}
-                    imageUrl={destination.imageUrl}
+                    imageUrl={destination.imageUrl || ''}
                   />
                 ))}
               </div>

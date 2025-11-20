@@ -59,7 +59,7 @@ export function TourCard({ tour }: TourCardProps) {
       <CardContent className="p-4 space-y-3">
         {/* Title */}
         <Link href={`/tours/${tour.slug}`} data-testid="link-tour-detail">
-          <h3 className="font-semibold text-lg leading-tight hover:text-primary transition-colors line-clamp-2 cursor-pointer">
+          <h3 className="font-semibold text-lg leading-tight hover:text-primary transition-colors line-clamp-2">
             {tour.title}
           </h3>
         </Link>

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/Footer";
 import { TourCard } from "@/components/TourCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +19,55 @@ import {
 } from "@/components/ui/select";
 
 export default function Tours() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activityType, setActivityType] = useState("all");
-  const [destination, setDestination] = useState("all");
+  const [location, navigate] = useLocation();
+  
+  // Extract search params from wouter location (reactive!)
+  const searchParams = useMemo(() => {
+    const searchString = location.includes('?') ? location.split('?')[1] : '';
+    return new URLSearchParams(searchString);
+  }, [location]);
+  
+  // Derive filter values directly from URL (no state duplication)
+  const searchQuery = searchParams.get("search") || "";
+  const activityType = searchParams.get("activityType") || "all";
+  const destination = searchParams.get("destination") || "all";
+  
+  // Sort is client-side only, not in URL
   const [sortBy, setSortBy] = useState("featured");
+  
+  // Update URL when user changes filters - preserve ALL existing params
+  const updateFilters = (newFilters: { search?: string; activityType?: string; destination?: string }) => {
+    // Re-read fresh params from current location to avoid stale memo
+    const searchString = location.includes('?') ? location.split('?')[1] : '';
+    const params = new URLSearchParams(searchString);
+    
+    // Update only the specific filter values being changed
+    if (newFilters.search !== undefined) {
+      if (newFilters.search) {
+        params.set("search", newFilters.search);
+      } else {
+        params.delete("search");
+      }
+    }
+    
+    if (newFilters.activityType !== undefined) {
+      if (newFilters.activityType && newFilters.activityType !== "all") {
+        params.set("activityType", newFilters.activityType);
+      } else {
+        params.delete("activityType");
+      }
+    }
+    
+    if (newFilters.destination !== undefined) {
+      if (newFilters.destination && newFilters.destination !== "all") {
+        params.set("destination", newFilters.destination);
+      } else {
+        params.delete("destination");
+      }
+    }
+    
+    navigate(`/tours${params.toString() ? `?${params.toString()}` : ""}`, { replace: true });
+  };
 
   const { data: tours, isLoading } = useQuery<Tour[]>({
     queryKey: ["/api/tours", { activityType, destination, search: searchQuery }],
@@ -42,7 +88,25 @@ export default function Tours() {
     },
   });
 
-  const displayTours = tours || [];
+  const displayTours = useMemo(() => {
+    if (!tours) return [];
+    
+    const sorted = [...tours];
+    
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+      case "price-high":
+        return sorted.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      case "rating":
+        return sorted.sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
+      case "duration":
+        return sorted.sort((a, b) => a.duration - b.duration);
+      case "featured":
+      default:
+        return sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    }
+  }, [tours, sortBy]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,7 +138,7 @@ export default function Tours() {
                     id="search"
                     placeholder="Search by name or location..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => updateFilters({ search: e.target.value })}
                     className="pl-10"
                     data-testid="input-search-tours"
                   />
@@ -84,7 +148,7 @@ export default function Tours() {
               {/* Activity Type */}
               <div>
                 <Label htmlFor="activity-type">Activity Type</Label>
-                <Select value={activityType} onValueChange={setActivityType}>
+                <Select value={activityType} onValueChange={(value) => updateFilters({ activityType: value })}>
                   <SelectTrigger id="activity-type" data-testid="select-activity-type">
                     <SelectValue placeholder="All Activities" />
                   </SelectTrigger>
@@ -101,7 +165,7 @@ export default function Tours() {
               {/* Destination */}
               <div>
                 <Label htmlFor="destination">Destination</Label>
-                <Select value={destination} onValueChange={setDestination}>
+                <Select value={destination} onValueChange={(value) => updateFilters({ destination: value })}>
                   <SelectTrigger id="destination" data-testid="select-destination">
                     <SelectValue placeholder="All Destinations" />
                   </SelectTrigger>
@@ -171,9 +235,8 @@ export default function Tours() {
                   variant="outline"
                   className="mt-4"
                   onClick={() => {
-                    setSearchQuery("");
-                    setActivityType("all");
-                    setDestination("all");
+                    updateFilters({ search: "", activityType: "all", destination: "all" });
+                    setSortBy("featured");
                   }}
                   data-testid="button-clear-filters"
                 >
